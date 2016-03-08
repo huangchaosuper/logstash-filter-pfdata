@@ -46,14 +46,15 @@ class LogStash::Filters::Pfdata < LogStash::Filters::Base
     return unless original_value
 
     begin
-      parsed = LogStash::Json.load(original_value)
+      parsed = "{}";
+      parsed = Base64.decode64(parsed) if parsed != '-'
+      json_value = LogStash::Json.load(parsed)
     rescue => e
       @tag_on_failure.each{|tag| event.tag(tag)}
-      @logger.warn("Error parsing json", :source => @source, :raw => source, :exception => e)
+      @logger.warn("Error parsing json", :field => @field, :raw => field, :exception => e)
       return
     end
 
-    json_value = Base64.decode64(parsed) if parsed != '-'
 
 
     if json_value.is_a?(Array)
